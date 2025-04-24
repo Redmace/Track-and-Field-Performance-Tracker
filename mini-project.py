@@ -85,6 +85,8 @@ results = load_results()
 
 #Add new event in case missing
 def get_event_object(event_name):
+    if event_name not in iaaf_all_events:
+        raise ValueError(f"Invalid event name: {event_name}")
     if event_name not in results:
         if iaaf_all_events[event_name]['type'] == 'track':
             results[event_name] = TrackEvent(event_name)
@@ -94,6 +96,8 @@ def get_event_object(event_name):
 
 #Submitting results
 def submit_result():
+    if event_name not in iaaf_all_events:
+        raise ValueError(f"Invalid event name: {event_name}")
     event = event_entry.get()
     try:
         value = float(result_entry.get())
@@ -148,8 +152,10 @@ root = tk.Tk()
 root.title("Track and Field Performance Tracker")
 
 tk.Label(root, text='Event:').grid(row=0, column=0, padx=10, pady=5)
-event_entry = tk.Entry(root)
-event_entry.grid(row=0, column=1, padx=10, pady=5)
+event_var = tk.StringVar(root)
+event_var.set("Select Event")
+event_menu = tk.OptionMenu(root, event_var, *iaaf_all_events.keys())
+event_menu.grid(row=0, column=1, padx=10, pady=5)
 
 tk.Label(root, text='Result:').grid(row=1, column=0, padx=10, pady=5)
 result_entry = tk.Entry(root)
