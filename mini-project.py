@@ -40,7 +40,7 @@ iaaf_all_events = {
     "ShotPut": {"A": 51.39, "B": 1.5, "C": 1.05, "type": "field", "to_cm": True},
     "Discus": {"A": 12.91, "B": 4.0, "C": 1.1, "type": "field", "to_cm": True},
     "Javelin": {"A": 10.14, "B": 7.0, "C": 1.08, "type": "field", "to_cm": True},
-    "Hammer": {"A": 13.407, "B": 7.0, "C": 1.05, "type": "field", "to_cm": True},
+    "HammerThrow": {"A": 13.407, "B": 7.0, "C": 1.05, "type": "field", "to_cm": True},
 }
 
 def calc_iaaf_points(event, performance):
@@ -66,17 +66,17 @@ def save_results(events):
             file.write(f"{event_name}:{','.join(map(str, event_obj.results))}\n")
 
 def load_results():
-    events = {
-        "100m": TrackEvent("100m"),
-        "400m": TrackEvent("400m"),
-        "LongJump": FieldEvent("LongJump"),
-        "HighJump": FieldEvent("HighJump")
-        }
+    events = {}
+    for event_name, event_data in iaaf_all_events.items():
+        if event_data["type"] == "track":
+            events[event_name] = TrackEvent(event_name)
+        else:
+            events[event_name] = FieldEvent(event_name)
     if os.path.exists("results.txt"):
                with open("results.txt", "r") as file:
                    for line in file:
                        name, data = line.strip().split(":")
-                       values = list(map(float, data.split(",")))
+                       values = [float(v) for v in data.split(",") if v.strip()]
                        for v in values:
                            events[name].add_result(v)
     return events
@@ -85,8 +85,6 @@ results = load_results()
 
 #Add new event in case missing
 def get_event_object(event_name):
-    if event_name not in iaaf_all_events:
-        raise ValueError(f"Invalid event name: {event_name}")
     if event_name not in results:
         if iaaf_all_events[event_name]['type'] == 'track':
             results[event_name] = TrackEvent(event_name)
@@ -96,20 +94,18 @@ def get_event_object(event_name):
 
 #Submitting results
 def submit_result():
-    if event_name not in iaaf_all_events:
-        raise ValueError(f"Invalid event name: {event_name}")
-    event = event_entry.get()
+    event = event_var.get()
     try:
         value = float(result_entry.get())
     except ValueError:
         messagebox.showerror("Error", "Please enter a valid number for result")
         return
-    if event not in iaaf_all_events:
-        messagebox.showerror("Error", "Invalid event name")
-        return
     event_obj = get_event_object(event)
     event_obj.add_result(value)
-    messagebox.showinfo("Success", f"Result {value} added to {event}")
+    if isinstance(event_obj, TrackEvent):
+        messagebox.showinfo("Success", f"Result {value} seconds added to {event}") #error because it always says seconds
+    elif isinstance(event_obj, FieldEvent):
+        messagebox.showinfo("Success", f"Result {value} meters added to {event}")
   
 #Show personal bests and points
 def show_summary():
@@ -126,7 +122,7 @@ def show_summary():
 
 #Plot performance progression
 def plot_progress():
-    event = event_entry.get()
+    event = event_var.get()
     if event not in results:
         messagebox.showerror("Error", "No data for this event")
         return
@@ -154,8 +150,8 @@ root.title("Track and Field Performance Tracker")
 tk.Label(root, text='Event:').grid(row=0, column=0, padx=10, pady=5)
 event_var = tk.StringVar(root)
 event_var.set("Select Event")
-event_menu = tk.OptionMenu(root, event_var, *iaaf_all_events.keys())
-event_menu.grid(row=0, column=1, padx=10, pady=5)
+event_entry = tk.OptionMenu(root, event_var, *iaaf_all_events.keys())
+event_entry.grid(row=0, column=1, padx=10, pady=5)
 
 tk.Label(root, text='Result:').grid(row=1, column=0, padx=10, pady=5)
 result_entry = tk.Entry(root)
@@ -168,4 +164,3 @@ tk.Button(root, text='Exit', command=on_exit).grid(row=4, column=0, columnspan=2
 
 root.mainloop()
 
-        
