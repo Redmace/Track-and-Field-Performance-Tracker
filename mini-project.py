@@ -37,22 +37,16 @@ iaaf_all_events = {
     "TripleJump": {"A": 0.188807, "B": 210.0, "C": 1.41, "type": "field", "to_cm": True},
     "HighJump": {"A": 0.8465, "B": 75.0, "C": 1.42, "type": "field", "to_cm": True},
     "PoleVault": {"A": 0.2797, "B": 100.0, "C": 1.35, "type": "field", "to_cm": True},
-    "ShotPut": {"A": 51.39, "B": 1.5, "C": 1.05, "type": "field"},
-    "Discus": {"A": 12.91, "B": 4.0, "C": 1.1, "type": "field"},
-    "Javelin": {"A": 10.14, "B": 7.0, "C": 1.08, "type": "field"},
-    "Hammer": {"A": 13.407, "B": 7.0, "C": 1.05, "type": "field"},
-    
-    #Multi
-    "Decathlon": {"custom": True},
-    "Heptathlon": {"custom": True},
+    "ShotPut": {"A": 51.39, "B": 1.5, "C": 1.05, "type": "field", "to_cm": True},
+    "Discus": {"A": 12.91, "B": 4.0, "C": 1.1, "type": "field", "to_cm": True},
+    "Javelin": {"A": 10.14, "B": 7.0, "C": 1.08, "type": "field", "to_cm": True},
+    "Hammer": {"A": 13.407, "B": 7.0, "C": 1.05, "type": "field", "to_cm": True},
 }
 
 def calc_iaaf_points(event, performance):
     if event not in iaaf_all_events:
         raise ValueError(f"No scoring data for {event}")
     data = iaaf_all_events[event]
-    if data.get("custom"):
-        return 0
     A, B, C = data['A'], data['B'], data['C']
     P = performance * 100 if data.get("to_cm") else performance
     try:
